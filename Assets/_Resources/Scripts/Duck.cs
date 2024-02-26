@@ -7,7 +7,6 @@ public class Duck : MonoBehaviour
     public bool isMove { get; set; }
     [SerializeField] private bool isFacingRight;
     [SerializeField] private float moveSpeedUnitsPerSecond;
-
     private Vector3 startPos;
     private Quaternion startRot;
     private Tween animationTween;

@@ -17,8 +17,6 @@ public class GameManager : MonoSingleton<GameManager>
     {
         int count = ReturnActivatedDucksCount();
         int index;
-
-        Debug.Log(count);
         for (int i = 0; i < count; i++)
         {
             index = Random.Range(0, ducks.Count);
