@@ -1,9 +1,11 @@
+using System.Net;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+
 
 public class RifleController : MonoSingleton<RifleController>
 {
-    public bool IsCursorVisible { get; set; }
-    [SerializeField] private GameObject crosshair;
     [SerializeField] private LayerMask mask;
     [SerializeField] private float rifleOffsetX;
 
@@ -11,33 +13,54 @@ public class RifleController : MonoSingleton<RifleController>
     private float lastOffsetX;
     private Vector3 mousePos;
     private Vector3 riflePos;
-
     private bool IsClicked => Input.GetKeyDown(KeyCode.Mouse0);
+    private bool IsPressedKeyR => Input.GetKeyDown(KeyCode.R);
+
+    //Mods
+    [SerializeField] private float reloadDelay;
+    private const int bulletsCount = 3;
+    private int currentBulletCount;
 
     void Start()
     {
-        IsCursorVisible = false;
-        SetCursorVisible();
+        currentBulletCount = bulletsCount;
     }
 
     private void Update()
     {
         if (GameManager.Instance.isPlay)
         {
-            SetCrosshairPosition();
+            SetMousePosition();
             ChangeLookingPos();
             if (IsClicked)
             {
                 OnClickLeftButton();
             }
+            if (IsPressedKeyR && GameManager.Instance.threeBulletMod)
+            {
+                UIManager.Instance.ReloadRifle();
+            }
+        }
+    }
+    public void ReloadRifle()
+    {
+        currentBulletCount = bulletsCount;
+    }
+
+    private void Fire()
+    {
+        if (GameMods.activeMod == GameMods.Mods.threeBullets && currentBulletCount > 0)
+        {
+            currentBulletCount -= 1;
+            UIManager.Instance.DisableNextActiveBullet();
         }
     }
 
-    private void SetCrosshairPosition()
+    public Vector3 SetMousePosition()
     {
         mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mousePos.z = 0;
-        crosshair.transform.position = mousePos;
+        mousePos.z = Camera.main.transform.position.z + Camera.main.nearClipPlane;
+        return mousePos;
     }
 
     private void ChangeLookingPos()
@@ -60,16 +83,17 @@ public class RifleController : MonoSingleton<RifleController>
 
     private void OnClickLeftButton()
     {
-        raycastHit = Physics2D.Raycast(mousePos, mousePos.z * Vector3.forward, 10f, mask);
-        if (raycastHit.collider == null)
-        {
+        if (GameManager.Instance.threeBulletMod && currentBulletCount <= 0)
             return;
-        }
+
+        Fire();
+        raycastHit = Physics2D.Raycast(mousePos, mousePos.z * Vector3.forward, 10f, mask);
+
+        if (raycastHit.collider == null)
+            return;
+
         raycastHit.collider.gameObject.GetComponent<Duck>().Disable();
     }
 
-    private void SetCursorVisible()
-    {
-        Cursor.visible = IsCursorVisible;
-    }
+
 }

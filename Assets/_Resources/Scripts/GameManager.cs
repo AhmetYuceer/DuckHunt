@@ -2,57 +2,77 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameManager : MonoSingleton<GameManager>
+public class GameManager : MonoSingleton<GameManager>, ISelectedMod
 {
     public bool isPlay { get; set; }
 
     [SerializeField] private List<GameObject> ducks = new List<GameObject>();
     [SerializeField] private int maxActivateDucksCount;
     [SerializeField] private float timerAmount;
-
     private Duck duck;
     private int score;
     private float time;
 
+    //Mods 
+    public bool threeBulletMod, sixtySecondsMod;
+
     void Start()
     {
-        isPlay = false;
-        time = timerAmount;
-        score = 0;
-        UIManager.Instance.SetTimer(time);
-        SaveAndLoad.Instance.SetMaxScore(0);
-        ActivateDucks();
+        sixtySecondsMod = false;
+        threeBulletMod = false;
+        StartingGame();
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (sixtySecondsMod)
         {
-            isPlay = true;
+            UpdateTimer();
         }
+    }
 
-        if (isPlay)
+    public void StartingGame()
+    {
+        switch (GameMods.activeMod)
         {
-            SetTimer();
+            case GameMods.Mods.threeBullets:
+                SelectThreeBulletsMod();
+                break;
+            case GameMods.Mods.sixtySeconds:
+                SelectSixtySecondsMod();
+                break;
+            default: break;
         }
+        isPlay = true;
+        ActivateDucks();
+    }
+    public void SelectSixtySecondsMod()
+    {
+        sixtySecondsMod = true;
+        time = timerAmount;
+        score = 0;
+        UIManager.Instance.SetTimer(time);
+        SaveAndLoad.Instance.SetMaxScore(0);
+    }
+
+    public void SelectThreeBulletsMod()
+    {
+        threeBulletMod = true;
     }
 
     private void EndGame()
     {
         int maxScore = SaveAndLoad.Instance.GetMaxScore();
-
         if (score > maxScore)
-        {
             SaveAndLoad.Instance.SetMaxScore(score);
-        }
+
         UIManager.Instance.ActivateEndPanel();
     }
 
-    private void SetTimer()
+    private void UpdateTimer()
     {
         time -= Time.deltaTime;
         int timeInt = Mathf.FloorToInt(time);
-
         if (timeInt <= 0)
         {
             isPlay = false;
@@ -62,7 +82,6 @@ public class GameManager : MonoSingleton<GameManager>
         UIManager.Instance.SetTimer(timeInt);
     }
 
-    #region Public Functions
     public void AddScore(int increaseAmount)
     {
         score += increaseAmount;
@@ -76,27 +95,21 @@ public class GameManager : MonoSingleton<GameManager>
         {
             index = Random.Range(0, ducks.Count);
             duck = ducks[index].GetComponent<Duck>();
+
             if (duck.isMove)
-            {
                 i--;
-            }
+
             duck.Activate();
         }
     }
-    #endregion
-
-    #region Private Functions
     private int ReturnActivatedDucksCount()
     {
         int count = 0;
         foreach (var duck in ducks)
         {
             if (duck.GetComponent<Duck>().isMove)
-            {
                 count++;
-            }
         }
         return maxActivateDucksCount - count;
     }
-    #endregion
 }
