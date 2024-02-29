@@ -27,14 +27,7 @@ public class UIManager : MonoSingleton<UIManager>, ISelectedMod
 
     void Start()
     {
-        SetCursorVisible(true);
         StartingGame();
-    }
-
-    void Update()
-    {
-        Vector2 mousePosition = Input.mousePosition;
-        crosshairReload.transform.position = mousePosition;
     }
 
     public void StartingGame()
@@ -77,15 +70,15 @@ public class UIManager : MonoSingleton<UIManager>, ISelectedMod
 
     #region Three Bullets Mod
 
-    public void ReloadRifle()
+    public void ReloadedRifle()
     {
-        SetCursorVisible(false);
-    }
-
-    public void SetCursorVisible(bool isCursorVisible)
-    {
-        Cursor.visible = isCursorVisible;
-        Cursor.SetCursor(crosshair, Vector2.zero, CursorMode.Auto);
+        foreach (var bullet in bullets)
+        {
+            if (!bullet.activeSelf)
+            {
+                bullet.SetActive(true);
+            }
+        }
     }
 
     public void DisableNextActiveBullet()

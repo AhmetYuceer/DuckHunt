@@ -38,13 +38,15 @@ public class RifleController : MonoSingleton<RifleController>
             }
             if (IsPressedKeyR && GameManager.Instance.threeBulletMod)
             {
-                UIManager.Instance.ReloadRifle();
+                UICrosshair.Instance.ReloadRifle();
             }
         }
     }
-    public void ReloadRifle()
+
+    public void ReloadedRifle()
     {
         currentBulletCount = bulletsCount;
+        Debug.Log(currentBulletCount);
     }
 
     private void Fire()
@@ -54,6 +56,7 @@ public class RifleController : MonoSingleton<RifleController>
             currentBulletCount -= 1;
             UIManager.Instance.DisableNextActiveBullet();
         }
+
     }
 
     public Vector3 SetMousePosition()
@@ -84,8 +87,10 @@ public class RifleController : MonoSingleton<RifleController>
     private void OnClickLeftButton()
     {
         if (GameManager.Instance.threeBulletMod && currentBulletCount <= 0)
+        {
+            UICrosshair.Instance.ReloadRifle();
             return;
-
+        }
         Fire();
         raycastHit = Physics2D.Raycast(mousePos, mousePos.z * Vector3.forward, 10f, mask);
 
@@ -94,6 +99,4 @@ public class RifleController : MonoSingleton<RifleController>
 
         raycastHit.collider.gameObject.GetComponent<Duck>().Disable();
     }
-
-
 }
