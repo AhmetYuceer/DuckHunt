@@ -38,6 +38,11 @@ public class Duck : MonoBehaviour
         }
     }
 
+    public void SetSpeed(float newSpeed)
+    {
+        moveSpeedUnitsPerSecond = newSpeed;
+    }
+
     public void Activate()
     {
         isMove = true;
@@ -59,6 +64,7 @@ public class Duck : MonoBehaviour
         transform.position = startPos;
         transform.rotation = startRot;
         GameManager.Instance.ActivateDucks();
+        GameManager.Instance.SpeedUpDucks();
     }
 
     private void OnTriggerEnter2D(Collider2D other)

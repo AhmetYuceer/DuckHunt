@@ -9,6 +9,7 @@ using DG.Tweening;
 
 public class UIManager : MonoSingleton<UIManager>, ISelectedMod
 {
+    public bool isPlay;
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI timerText;
 
@@ -47,6 +48,7 @@ public class UIManager : MonoSingleton<UIManager>, ISelectedMod
                 break;
         }
         DisableEndPanel();
+        isPlay = true;
     }
 
     public void SelectSixtySecondsMod()
@@ -96,6 +98,8 @@ public class UIManager : MonoSingleton<UIManager>, ISelectedMod
 
     public void ActivateEndPanel()
     {
+        UICrosshair.Instance.EndGame();
+        isPlay = false;
         SetMaxScoreText();
         SetCurrentScore();
         endGamePanel.SetActive(true);

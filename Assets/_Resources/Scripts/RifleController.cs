@@ -3,12 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 public class RifleController : MonoSingleton<RifleController>
 {
     [SerializeField] private LayerMask mask;
     [SerializeField] private float rifleOffsetX;
-
     private RaycastHit2D raycastHit;
     private float lastOffsetX;
     private Vector3 mousePos;
@@ -17,9 +15,9 @@ public class RifleController : MonoSingleton<RifleController>
     private bool IsPressedKeyR => Input.GetKeyDown(KeyCode.R);
 
     //Mods
-    [SerializeField] private float reloadDelay;
     private const int bulletsCount = 3;
     private int currentBulletCount;
+    public bool isReloading;
 
     void Start()
     {
@@ -46,26 +44,25 @@ public class RifleController : MonoSingleton<RifleController>
     public void ReloadedRifle()
     {
         currentBulletCount = bulletsCount;
-        Debug.Log(currentBulletCount);
     }
 
     private void Fire()
     {
-        if (GameMods.activeMod == GameMods.Mods.threeBullets && currentBulletCount > 0)
+        if (GameMods.activeMod == GameMods.Mods.threeBullets && currentBulletCount > 0 && !isReloading)
         {
             currentBulletCount -= 1;
             UIManager.Instance.DisableNextActiveBullet();
+
+            if (currentBulletCount <= 0)
+                UICrosshair.Instance.ReloadRifle();
         }
-
     }
-
     public Vector3 SetMousePosition()
     {
         mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mousePos.z = Camera.main.transform.position.z + Camera.main.nearClipPlane;
         return mousePos;
     }
-
     private void ChangeLookingPos()
     {
         riflePos = transform.position;
@@ -87,10 +84,8 @@ public class RifleController : MonoSingleton<RifleController>
     private void OnClickLeftButton()
     {
         if (GameManager.Instance.threeBulletMod && currentBulletCount <= 0)
-        {
-            UICrosshair.Instance.ReloadRifle();
             return;
-        }
+
         Fire();
         raycastHit = Physics2D.Raycast(mousePos, mousePos.z * Vector3.forward, 10f, mask);
 

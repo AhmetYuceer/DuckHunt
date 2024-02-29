@@ -173,7 +173,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isFacingRight: 0
-  moveSpeedUnitsPerSecond: 5
+  moveSpeedUnitsPerSecond: 2
   scoreAmount: 100
 --- !u!1 &4964463673146538671
 GameObject:

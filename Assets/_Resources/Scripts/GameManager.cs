@@ -8,19 +8,20 @@ public class GameManager : MonoSingleton<GameManager>, ISelectedMod
 
     [SerializeField] private List<GameObject> ducks = new List<GameObject>();
     [SerializeField] private int maxActivateDucksCount;
+    [SerializeField] private float defaultDucksSpeed = 2f;
+    [SerializeField] private float speedIncreaseAmount = 0f;
     [SerializeField] private float timerAmount;
     private Duck duck;
     private int score;
     private float time;
 
-    //Mods 
+    //Mods  
     public bool threeBulletMod, sixtySecondsMod;
 
     void Start()
     {
-        sixtySecondsMod = false;
-        threeBulletMod = false;
         StartingGame();
+        SpeedUpDucks();
     }
 
     void Update()
@@ -31,8 +32,20 @@ public class GameManager : MonoSingleton<GameManager>, ISelectedMod
         }
     }
 
+    public void SpeedUpDucks()
+    {
+        defaultDucksSpeed += speedIncreaseAmount;
+        foreach (var item in ducks)
+        {
+            duck = item.GetComponent<Duck>();
+            duck.SetSpeed(defaultDucksSpeed);
+        }
+    }
+
     public void StartingGame()
     {
+        sixtySecondsMod = false;
+        threeBulletMod = false;
         switch (GameMods.activeMod)
         {
             case GameMods.Mods.threeBullets:
