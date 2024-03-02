@@ -5,14 +5,10 @@ using UnityEngine;
 
 public class Cloud : MonoBehaviour
 {
-    [SerializeField] private Vector3 startingPos;
-
     private void Start()
     {
-        startingPos = transform.position;
-        transform.DOMoveY(transform.position.y - 0.5f, 0.5f)
+        transform.DOMoveY(transform.position.y - 0.2f, 2f)
             .SetEase(Ease.InOutQuad)
             .SetLoops(-1, LoopType.Yoyo);
     }
-
 }

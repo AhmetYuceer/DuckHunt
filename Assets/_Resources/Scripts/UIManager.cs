@@ -71,16 +71,34 @@ public class UIManager : MonoSingleton<UIManager>, ISelectedMod
     }
 
     #region Three Bullets Mod
-
-    public void ReloadedRifle()
+    int count = 0;
+    public void ReloadingRifle()
     {
         foreach (var bullet in bullets)
         {
             if (!bullet.activeSelf)
             {
+                Debug.Log(bullet.name);
+                count++;
+                SoundManager.Instance.ReloadingRifle();
                 bullet.SetActive(true);
+                break;
             }
         }
+
+        if (count >= bullets.Count)
+        {
+            count = 0;
+            SoundManager.Instance.ReloadedRifle();
+        }
+    }
+    public void DeactiveBullets()
+    {
+        foreach (var bullet in bullets)
+        {
+            bullet.SetActive(false);
+        }
+
     }
 
     public void DisableNextActiveBullet()

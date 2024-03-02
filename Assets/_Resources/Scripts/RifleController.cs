@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class RifleController : MonoSingleton<RifleController>
 {
+    [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private LayerMask mask;
     [SerializeField] private float rifleOffsetX;
     private RaycastHit2D raycastHit;
@@ -30,12 +31,13 @@ public class RifleController : MonoSingleton<RifleController>
         {
             SetMousePosition();
             ChangeLookingPos();
+
             if (IsClicked)
-            {
                 OnClickLeftButton();
-            }
+
             if (IsPressedKeyR && GameManager.Instance.threeBulletMod)
             {
+                UIManager.Instance.DeactiveBullets();
                 UICrosshair.Instance.ReloadRifle();
             }
         }
@@ -48,6 +50,7 @@ public class RifleController : MonoSingleton<RifleController>
 
     private void Fire()
     {
+        SoundManager.Instance.RifleFireSoundEffect();
         if (GameMods.activeMod == GameMods.Mods.threeBullets && currentBulletCount > 0 && !isReloading)
         {
             currentBulletCount -= 1;
@@ -83,15 +86,40 @@ public class RifleController : MonoSingleton<RifleController>
 
     private void OnClickLeftButton()
     {
+
         if (GameManager.Instance.threeBulletMod && currentBulletCount <= 0)
             return;
 
-        Fire();
-        raycastHit = Physics2D.Raycast(mousePos, mousePos.z * Vector3.forward, 10f, mask);
+        raycastHit = Physics2D.Raycast(mousePos, mousePos.z * Vector3.forward, 100f, mask);
 
-        if (raycastHit.collider == null)
+        if (raycastHit.collider == null || raycastHit.collider.transform.CompareTag("Dont Target"))
             return;
+        Fire();
+        if (raycastHit.collider.TryGetComponent(out Duck duck))
+            StartCoroutine(HuntedDuck(duck));
+        else
+            StartCoroutine(NotHunted());
+    }
 
-        raycastHit.collider.gameObject.GetComponent<Duck>().Disable();
+    private IEnumerator NotHunted()
+    {
+        mousePos.z = raycastHit.collider.transform.position.z - 0.1f;
+        GameObject bullet = Instantiate(bulletPrefab, mousePos, Quaternion.identity, raycastHit.collider.transform);
+
+        yield return new WaitForSeconds(0.05f);
+        SoundManager.Instance.NotHuntedSoundEffect();
+        yield return new WaitForSeconds(3f);
+
+        Destroy(bullet);
+    }
+
+    private IEnumerator HuntedDuck(Duck duck)
+    {
+        mousePos.z = raycastHit.collider.transform.position.z - 0.1f;
+        GameObject bullet = Instantiate(bulletPrefab, mousePos, Quaternion.identity, raycastHit.collider.transform);
+        duck.Hunted();
+        duck.bullets.Add(bullet);
+        yield return new WaitForSeconds(0.05f);
+        SoundManager.Instance.DuckHuntedSoundEffect();
     }
 }

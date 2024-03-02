@@ -1,26 +1,21 @@
 using System.Collections;
 using UnityEngine;
 using DG.Tweening;
+using System.Collections.Generic;
 
 public class Duck : MonoBehaviour
 {
+    public List<GameObject> bullets = new List<GameObject>();
     public bool isMove { get; set; }
     [SerializeField] private bool isFacingRight;
     [SerializeField] private float moveSpeedUnitsPerSecond;
     [SerializeField] private int scoreAmount;
-
     private Vector3 startPos;
     private Quaternion startRot;
     private Tween animationTween;
 
     private void Start()
     {
-        animationTween = transform.DOMoveY(transform.position.y + 0.5f, 1f)
-            .SetEase(Ease.InOutQuad)
-            .SetLoops(-1, LoopType.Yoyo);
-
-        animationTween.Pause();
-
         startPos = transform.position;
         startRot = transform.rotation;
 
@@ -33,9 +28,7 @@ public class Duck : MonoBehaviour
     void Update()
     {
         if (isMove && GameManager.Instance.isPlay)
-        {
             transform.position += transform.right * moveSpeedUnitsPerSecond * Time.deltaTime;
-        }
     }
 
     public void SetSpeed(float newSpeed)
@@ -45,33 +38,56 @@ public class Duck : MonoBehaviour
 
     public void Activate()
     {
+        foreach (var bullet in bullets)
+        {
+            Destroy(bullet);
+        }
+        bullets.Clear();
+
+        animationTween = transform.DOMoveY(transform.position.y + 0.5f, 1f)
+            .SetEase(Ease.InOutQuad)
+            .SetLoops(-1, LoopType.Yoyo);
+        animationTween.Play();
         isMove = true;
         this.gameObject.SetActive(true);
-        animationTween.Play();
     }
 
-    public void Disable()
+    public void Hunted()
     {
-        this.gameObject.SetActive(false);
-        GameManager.Instance.AddScore(scoreAmount);
-        Return();
+        if (isMove)
+        {
+            isMove = false;
+            animationTween.Pause();
+            GameManager.Instance.AddScore(scoreAmount);
+            HuntedAnimation();
+            GameManager.Instance.SpeedUpDucks();
+        }
+    }
+
+    private void HuntedAnimation()
+    {
+        transform.DOMoveY(transform.position.y - 1f, 1f)
+        .SetRelative(true)
+        .SetEase(Ease.Linear)
+        .OnComplete(() =>
+        {
+            this.gameObject.SetActive(false);
+            Return();
+        });
     }
 
     private void Return()
     {
-        animationTween.Pause();
         isMove = false;
+        animationTween.Pause();
         transform.position = startPos;
         transform.rotation = startRot;
         GameManager.Instance.ActivateDucks();
-        GameManager.Instance.SpeedUpDucks();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if ((isFacingRight && other.gameObject.CompareTag("EndLeft")) || (!isFacingRight && other.gameObject.CompareTag("EndRight")))
-        {
             Return();
-        }
     }
 }

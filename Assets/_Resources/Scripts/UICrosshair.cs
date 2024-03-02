@@ -34,7 +34,6 @@ public class UICrosshair : MonoSingleton<UICrosshair>
         }
     }
 
-
     public void EndGame()
     {
         defaultCrosshair.gameObject.SetActive(false);
@@ -43,26 +42,54 @@ public class UICrosshair : MonoSingleton<UICrosshair>
 
     public void ReloadRifle()
     {
+        third = false;
+        second = false;
+        first = false;
         defaultCrosshair.gameObject.SetActive(false);
         reloadCrosshair.gameObject.SetActive(true);
         isReloading = true;
         RifleController.Instance.isReloading = isReloading;
-
     }
+
+    bool first, second, third;
 
     private void Reloading()
     {
         currentFillAmount += fillAmountIncrease * Time.deltaTime;
         reloadCrosshair.fillAmount = currentFillAmount;
+
+        if (currentFillAmount >= 0.3f && currentFillAmount <= 0.4f && !first)
+        {
+            UIManager.Instance.ReloadingRifle();
+            first = true;
+            Debug.Log("1");
+        }
+        else if (currentFillAmount >= 0.6f && currentFillAmount <= 0.7f && !second)
+        {
+            UIManager.Instance.ReloadingRifle();
+            second = true;
+            Debug.Log("2");
+
+        }
+        else if (currentFillAmount >= 0.9f && currentFillAmount <= 1f && !third)
+        {
+            UIManager.Instance.ReloadingRifle();
+            third = true;
+            Debug.Log("3");
+        }
+
         if (currentFillAmount >= 1)
         {
+            third = false;
+            second = false;
+            first = false;
+
+            isReloading = false;
             currentFillAmount = 0;
             reloadCrosshair.fillAmount = currentFillAmount;
-            isReloading = false;
             RifleController.Instance.isReloading = isReloading;
             reloadCrosshair.gameObject.SetActive(false);
             defaultCrosshair.gameObject.SetActive(true);
-            UIManager.Instance.ReloadedRifle();
             RifleController.Instance.ReloadedRifle();
         }
     }
