@@ -5,8 +5,8 @@ using System.Collections.Generic;
 
 public class Duck : MonoBehaviour
 {
-    public List<GameObject> bullets = new List<GameObject>();
     public bool isMove { get; set; }
+    public List<GameObject> bullets = new List<GameObject>();
     [SerializeField] private bool isFacingRight;
     [SerializeField] private float moveSpeedUnitsPerSecond;
     [SerializeField] private int scoreAmount;
@@ -23,12 +23,20 @@ public class Duck : MonoBehaviour
             isFacingRight = true;
         else
             isFacingRight = false;
+
+        animationTween = transform.DOMoveY(transform.position.y + 0.5f, 1f)
+                .SetEase(Ease.InOutQuad)
+                .SetLoops(-1, LoopType.Yoyo);
+        animationTween.Pause();
     }
 
     void Update()
     {
-        if (isMove && GameManager.Instance.isPlay)
-            transform.position += transform.right * moveSpeedUnitsPerSecond * Time.deltaTime;
+        if (GameManager.Instance.isPlay)
+        {
+            if (isMove)
+                transform.position += transform.right * moveSpeedUnitsPerSecond * Time.deltaTime;
+        }
     }
 
     public void SetSpeed(float newSpeed)
@@ -44,22 +52,19 @@ public class Duck : MonoBehaviour
         }
         bullets.Clear();
 
-        animationTween = transform.DOMoveY(transform.position.y + 0.5f, 1f)
-            .SetEase(Ease.InOutQuad)
-            .SetLoops(-1, LoopType.Yoyo);
-        animationTween.Play();
         isMove = true;
         this.gameObject.SetActive(true);
+        animationTween.Play();
     }
 
     public void Hunted()
     {
         if (isMove)
         {
-            isMove = false;
             animationTween.Pause();
-            GameManager.Instance.AddScore(scoreAmount);
+            isMove = false;
             HuntedAnimation();
+            GameManager.Instance.AddScore(scoreAmount);
             GameManager.Instance.SpeedUpDucks();
         }
     }
@@ -71,23 +76,26 @@ public class Duck : MonoBehaviour
         .SetEase(Ease.Linear)
         .OnComplete(() =>
         {
-            this.gameObject.SetActive(false);
             Return();
         });
     }
 
     private void Return()
     {
-        isMove = false;
         animationTween.Pause();
+        this.gameObject.SetActive(false);
         transform.position = startPos;
         transform.rotation = startRot;
         GameManager.Instance.ActivateDucks();
+        isMove = false;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if ((isFacingRight && other.gameObject.CompareTag("EndLeft")) || (!isFacingRight && other.gameObject.CompareTag("EndRight")))
+        {
+            HealthSystem.Instance.TakeDamage();
             Return();
+        }
     }
 }

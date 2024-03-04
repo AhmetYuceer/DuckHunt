@@ -7,7 +7,8 @@ public class UICrosshair : MonoSingleton<UICrosshair>
     [SerializeField] private Image reloadCrosshair;
     [SerializeField] private float fillAmountIncrease;
     [SerializeField] private bool isReloading;
-    float currentFillAmount = 0;
+    private float currentFillAmount = 0;
+    private bool first, second, third;
 
     void Start()
     {
@@ -21,22 +22,26 @@ public class UICrosshair : MonoSingleton<UICrosshair>
 
     void Update()
     {
-        reloadCrosshair.transform.position = Input.mousePosition;
-        defaultCrosshair.transform.position = Input.mousePosition;
+        if (UIManager.Instance.isPlay)
+        {
+            reloadCrosshair.transform.position = Input.mousePosition;
+            defaultCrosshair.transform.position = Input.mousePosition;
 
-        if (Input.GetMouseButtonDown(0) && Cursor.visible && UIManager.Instance.isPlay)
-        {
-            Cursor.visible = false;
-        }
-        if (isReloading)
-        {
-            Reloading();
+            if (Input.GetMouseButtonDown(0) && Cursor.visible)
+            {
+                Cursor.visible = false;
+            }
+            if (isReloading)
+            {
+                Reloading();
+            }
         }
     }
 
     public void EndGame()
     {
         defaultCrosshair.gameObject.SetActive(false);
+        reloadCrosshair.gameObject.SetActive(false);
         Cursor.visible = true;
     }
 
@@ -51,8 +56,6 @@ public class UICrosshair : MonoSingleton<UICrosshair>
         RifleController.Instance.isReloading = isReloading;
     }
 
-    bool first, second, third;
-
     private void Reloading()
     {
         currentFillAmount += fillAmountIncrease * Time.deltaTime;
@@ -62,20 +65,16 @@ public class UICrosshair : MonoSingleton<UICrosshair>
         {
             UIManager.Instance.ReloadingRifle();
             first = true;
-            Debug.Log("1");
         }
         else if (currentFillAmount >= 0.6f && currentFillAmount <= 0.7f && !second)
         {
             UIManager.Instance.ReloadingRifle();
             second = true;
-            Debug.Log("2");
-
         }
         else if (currentFillAmount >= 0.9f && currentFillAmount <= 1f && !third)
         {
             UIManager.Instance.ReloadingRifle();
             third = true;
-            Debug.Log("3");
         }
 
         if (currentFillAmount >= 1)

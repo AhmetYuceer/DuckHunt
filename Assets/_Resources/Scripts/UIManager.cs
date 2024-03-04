@@ -26,6 +26,9 @@ public class UIManager : MonoSingleton<UIManager>, ISelectedMod
     [SerializeField] private GameObject bulletsPanel;
     [SerializeField] private List<GameObject> bullets = new List<GameObject>();
 
+    [Header("Health System")]
+    [SerializeField] private List<GameObject> hearts = new List<GameObject>();
+
     void Start()
     {
         StartingGame();
@@ -40,6 +43,8 @@ public class UIManager : MonoSingleton<UIManager>, ISelectedMod
         {
             case GameMods.Mods.threeBullets:
                 SelectThreeBulletsMod();
+                SetSixtySecondsModButtons();
+
                 break;
             case GameMods.Mods.sixtySeconds:
                 SelectSixtySecondsMod();
@@ -59,6 +64,10 @@ public class UIManager : MonoSingleton<UIManager>, ISelectedMod
 
     public void SelectThreeBulletsMod()
     {
+        foreach (var heart in hearts)
+        {
+            heart.SetActive(true);
+        }
         bulletsPanel.SetActive(true);
     }
 
@@ -71,6 +80,30 @@ public class UIManager : MonoSingleton<UIManager>, ISelectedMod
     }
 
     #region Three Bullets Mod
+    public void AddHearth()
+    {
+        foreach (var heart in hearts)
+        {
+            if (!heart.activeSelf)
+            {
+                heart.SetActive(true);
+                break;
+            }
+        }
+    }
+
+    public void TakeDamage()
+    {
+        foreach (var heart in hearts)
+        {
+            if (heart.activeSelf)
+            {
+                heart.SetActive(false);
+                break;
+            }
+        }
+    }
+
     int count = 0;
     public void ReloadingRifle()
     {
@@ -78,7 +111,6 @@ public class UIManager : MonoSingleton<UIManager>, ISelectedMod
         {
             if (!bullet.activeSelf)
             {
-                Debug.Log(bullet.name);
                 count++;
                 SoundManager.Instance.ReloadingRifle();
                 bullet.SetActive(true);
@@ -98,7 +130,6 @@ public class UIManager : MonoSingleton<UIManager>, ISelectedMod
         {
             bullet.SetActive(false);
         }
-
     }
 
     public void DisableNextActiveBullet()

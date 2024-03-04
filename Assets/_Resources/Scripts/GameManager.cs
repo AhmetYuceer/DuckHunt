@@ -20,6 +20,7 @@ public class GameManager : MonoSingleton<GameManager>, ISelectedMod
 
     void Start()
     {
+
         StartingGame();
         SpeedUpDucks();
     }
@@ -65,7 +66,6 @@ public class GameManager : MonoSingleton<GameManager>, ISelectedMod
         time = timerAmount;
         score = 0;
         UIManager.Instance.SetTimer(time);
-        SaveAndLoad.Instance.SetMaxScore(0);
     }
 
     public void SelectThreeBulletsMod()
@@ -73,12 +73,12 @@ public class GameManager : MonoSingleton<GameManager>, ISelectedMod
         threeBulletMod = true;
     }
 
-    private void EndGame()
+    public void EndGame()
     {
+        isPlay = false;
         int maxScore = SaveAndLoad.Instance.GetMaxScore();
         if (score > maxScore)
             SaveAndLoad.Instance.SetMaxScore(score);
-
         UIManager.Instance.ActivateEndPanel();
     }
 

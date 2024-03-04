@@ -130,7 +130,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bullets: []
   isFacingRight: 0
-  moveSpeedUnitsPerSecond: 2
+  moveSpeedUnitsPerSecond: 3
   scoreAmount: 100
 --- !u!60 &4329776334849092995
 PolygonCollider2D:
